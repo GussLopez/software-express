@@ -1,54 +1,28 @@
-# API Express + MySQL
+﻿# Backend Express + MySQL
 
-Requiere Node.js 22 o superior y una instancia de MySQL para usar la base de datos.
-
-## Inicio
-
-Desde `back`:
-
-```sh
-npm install
-```
-
-Copia las variables de `.env.example` a `.env` y completa las credenciales de tu
-instancia de MySQL. Si ya tienes un `.env`, conserva sus valores y agrega los que
-falten. La base indicada en `DB_NAME` y el usuario deben existir en MySQL;
-la aplicación no crea bases ni tablas automáticamente.
-
-```sh
-npm run dev
-```
-
-Para ejecutar sin recarga automática: `npm start`.
+Base inicial para arrancar el servidor y conectar con MySQL.
 
 ## Estructura
 
 ```text
 src/
-  app.js                    # Express y middlewares
-  index.js                  # Inicio y cierre del servidor
+  app.js              # Configuración de Express
+  index.js            # Arranque y cierre del servidor
   config/
-    env.js                  # Variables de entorno
-    database.js             # Pool de conexiones MySQL
-  routes/                   # URLs y controladores asociados
-  controllers/              # Solicitudes y respuestas HTTP
-  services/                 # Lógica de negocio
-  models/                   # Consultas a MySQL
-  middlewares/              # Errores y rutas inexistentes
+    env.js            # Variables de entorno
+    database.js       # Pool y comprobación de conexión a MySQL
 ```
 
-Cada recurso nuevo puede seguir el flujo `routes → controllers → services → models`.
-Registra sus rutas en `src/routes/index.js`. Los modelos usan el pool de
-`config/database.js`; para valores enviados por el cliente utiliza parámetros:
-`pool.execute('SELECT * FROM productos WHERE id = ?', [id])`.
+## Ejecutar
 
-## Comprobar la API
+Requiere Node.js 22 o superior y MySQL disponible.
 
-- `GET http://localhost:4000/api/health`: devuelve `200` si la API está activa.
-- `GET http://localhost:4000/api/health/db`: ejecuta `SELECT 1`; devuelve `200`
-  si MySQL responde o `503` si falta configuración o no hay conexión.
-- Las rutas inexistentes devuelven `404` en JSON.
+1. Ejecuta `npm install` desde `back`.
+2. Configura `.env` siguiendo `.env.example`, conservando tus credenciales.
+   La base de datos y el usuario deben existir en MySQL.
+3. Ejecuta `npm run dev` para desarrollo o `npm start` para el arranque normal.
 
-La API puede iniciar sin MySQL disponible. El pool abre conexiones cuando se
-ejecuta una consulta. `.env` está excluido de Git; `.env.example` solo contiene
-la plantilla de configuración.
+El servidor escucha en el puerto indicado en `PORT` (4000 por defecto) después
+ de verificar la conexión a MySQL. Si la conexión falla, informa el error y termina.
+
+Esta base no incluye endpoints, modelos, servicios ni creación de tablas.
