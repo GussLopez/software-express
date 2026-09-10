@@ -1,7 +1,7 @@
 ﻿# Backend Express + MySQL
 
 Backend con Express, ES modules y MySQL. Incluye RF01: registro de jugadores
-y RF02: registro de videojuegos.
+RF02: registro de videojuegos y RF03: registro de puntuaciones.
 
 ## Estructura
 
@@ -83,6 +83,34 @@ estructura del SQL del reto y no inserta datos de ejemplo.
 
 Se eliminan espacios al inicio y al final. El nombre admite hasta 100 caracteres
 y el género hasta 50. El campo JSON se llama `genero`, sin tilde.
+
+## RF03: registrar puntuaciones
+
+Ejecuta `sql/003_create_puntuaciones.sql` en la base configurada en `DB_NAME`,
+después de crear las tablas `jugadores` y `videojuegos`. El script incluye claves
+foráneas y una restricción CHECK contra puntuaciones negativas (MySQL 8.0.16 o
+superior). El backend también valida los valores antes de consultar MySQL.
+
+`POST /api/puntuaciones` con `Content-Type: application/json`:
+
+```json
+{
+  "jugador_id": 1,
+  "videojuego_id": 2,
+  "puntuacion": 950
+}
+```
+
+- `201`: devuelve `message` y `puntuacion` con `id`, `jugador_id`,
+  `videojuego_id`, `puntuacion` y `fecha`. MySQL genera el ID y la fecha.
+- `400`: campos ausentes o inválidos, puntuación negativa, JSON mal formado,
+  o jugador/videojuego inexistente.
+- `500`: error interno sin detalles de MySQL.
+
+Los tres campos deben ser números enteros JSON, no cadenas. Los IDs admiten de
+1 a 2147483647 y la puntuación de 0 a 2147483647, conforme al tipo INT del SQL.
+Un jugador puede registrar múltiples puntuaciones, incluso en el mismo juego.
+Las claves foráneas comprueban que ambos registros existan al insertar.
 
 ## Pruebas
 
