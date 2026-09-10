@@ -1,4 +1,11 @@
-import { insertarJugador } from '../models/jugadores.model.js';
+import {
+  insertarJugador,
+  seleccionarJugadores,
+} from '../models/jugadores.model.js';
+
+export async function obtenerJugadores() {
+  return seleccionarJugadores();
+}
 
 export async function crearJugador(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
