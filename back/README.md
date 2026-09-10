@@ -1,6 +1,7 @@
 ﻿# Backend Express + MySQL
 
-Backend con Express, ES modules y MySQL. Incluye RF01: registro de jugadores.
+Backend con Express, ES modules y MySQL. Incluye RF01: registro de jugadores
+y RF02: registro de videojuegos.
 
 ## Estructura
 
@@ -56,6 +57,32 @@ con la tabla del archivo `sql-db.sql` del reto y no inserta datos de ejemplo.
 Se eliminan espacios al inicio y al final. Los límites son 100 caracteres para
 nombre, 50 para gamertag y 150 para correo. Se comprueba el formato básico del
 correo; no se exige que sea único.
+
+## RF02: registrar videojuegos
+
+La tabla `videojuegos` debe existir en la base configurada en `DB_NAME`. Para una
+instancia nueva, ejecuta `sql/002_create_videojuegos.sql` en esa base. Respeta la
+estructura del SQL del reto y no inserta datos de ejemplo.
+
+`POST /api/videojuegos` con `Content-Type: application/json`:
+
+```json
+{
+  "nombre": "Tekken",
+  "genero": "Peleas"
+}
+```
+
+- `201`: devuelve `message` y `videojuego` con `id`, `nombre` y `genero`.
+  MySQL genera el ID; no se toma del cliente.
+- `400`: nombre o género ausentes, vacíos, de tipo incorrecto o demasiado largos,
+  o JSON mal formado.
+- `409`: ya existe un videojuego con ese nombre. La restricción UNIQUE de MySQL
+  evita duplicados incluso en solicitudes simultáneas, según la collation.
+- `500`: error interno sin detalles de MySQL.
+
+Se eliminan espacios al inicio y al final. El nombre admite hasta 100 caracteres
+y el género hasta 50. El campo JSON se llama `genero`, sin tilde.
 
 ## Pruebas
 
