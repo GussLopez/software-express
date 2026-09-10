@@ -29,6 +29,53 @@ function post(body) {
   });
 }
 
+test('consulta los jugadores con todos sus campos y orden por ID', async () => {
+  const jugadores = [
+    { id: 1, ...datos, fecha_registro: '2026-09-09 18:00:00' },
+    {
+      id: 2,
+      nombre: 'Luis',
+      gamertag: 'LuisGG',
+      correo: 'luis@example.com',
+      fecha_registro: '2026-09-10 12:00:00',
+    },
+  ];
+  const execute = mock.method(pool, 'execute', async (sql) => {
+    assert.equal(
+      sql,
+      'SELECT id, nombre, gamertag, correo, fecha_registro FROM jugadores ORDER BY id ASC',
+    );
+    return [jugadores];
+  });
+
+  const res = await fetch(base);
+
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { jugadores });
+  assert.equal(execute.mock.callCount(), 1);
+});
+
+test('devuelve una lista vacía cuando no hay jugadores registrados', async () => {
+  mock.method(pool, 'execute', async () => [[]]);
+
+  const res = await fetch(base);
+
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { jugadores: [] });
+});
+
+test('oculta detalles internos cuando falla la consulta de jugadores', async () => {
+  mock.method(console, 'error', () => {});
+  mock.method(pool, 'execute', async () => {
+    throw new Error('SQL y credenciales privadas');
+  });
+
+  const res = await fetch(base);
+
+  assert.equal(res.status, 500);
+  assert.deepEqual(await res.json(), { message: 'Error interno del servidor' });
+});
+
 test('registra con parámetros, limpia espacios y devuelve ID y fecha de MySQL', async () => {
   const registrado = { id: 7, ...datos, fecha_registro: '2026-09-09 18:00:00' };
   const execute = mock.method(pool, 'execute', async (sql, params) => {

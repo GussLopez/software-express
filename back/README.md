@@ -1,7 +1,8 @@
 ﻿# Backend Express + MySQL
 
 Backend con Express, ES modules y MySQL. Incluye RF01: registro de jugadores
-RF02: registro de videojuegos y RF03: registro de puntuaciones.
+RF02: registro de videojuegos, RF03: registro de puntuaciones y RF04: consulta
+de jugadores.
 
 ## Estructura
 
@@ -12,9 +13,9 @@ src/
   config/
     env.js            # Variables de entorno
     database.js       # Pool y comprobación de conexión a MySQL
-  routes/             # Endpoint de registro
+  routes/             # Endpoints de registro y consulta
   controllers/        # Respuestas HTTP
-  services/           # Validación y reglas de registro
+  services/           # Validación y reglas de negocio
   models/             # Consultas parametrizadas
   middlewares/        # Respuestas de error
 ```
@@ -115,4 +116,30 @@ Las claves foráneas comprueban que ambos registros existan al insertar.
 ## Pruebas
 
 Ejecuta `npm test`. Las pruebas HTTP usan el servidor Express con consultas MySQL
-simuladas y cubren registro, validaciones, duplicados, JSON inválido y errores.
+simuladas y cubren registro, consulta, validaciones, duplicados, JSON inválido y
+errores.
+
+## RF04: consultar jugadores
+
+`GET /api/jugadores` devuelve todos los jugadores ordenados por ID ascendente.
+No requiere cuerpo ni parámetros.
+
+Respuesta `200`:
+
+```json
+{
+  "jugadores": [
+    {
+      "id": 1,
+      "nombre": "Ana López",
+      "gamertag": "AnaGG",
+      "correo": "ana@example.com",
+      "fecha_registro": "2026-09-09T18:00:00.000Z"
+    }
+  ]
+}
+```
+
+- Si no hay jugadores, devuelve `200` con `{ "jugadores": [] }`.
+- Si falla la consulta, devuelve `500` con un mensaje genérico, sin detalles de
+  MySQL.
