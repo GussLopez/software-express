@@ -48,7 +48,6 @@ export async function crearPuntuacion(body) {
       puntuacion: body.puntuacion,
     });
   } catch (error) {
-    // Las claves foráneas verifican la existencia al insertar, sin carreras.
     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
       throw Object.assign(
         new Error('El jugador y el videojuego deben existir'),
