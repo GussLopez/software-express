@@ -1,4 +1,11 @@
-import { insertarVideojuego } from '../models/videojuegos.model.js';
+import {
+  insertarVideojuego,
+  seleccionarVideojuegos,
+} from '../models/videojuegos.model.js';
+
+export async function obtenerVideojuegos() {
+  return seleccionarVideojuegos();
+}
 
 export async function crearVideojuego(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
