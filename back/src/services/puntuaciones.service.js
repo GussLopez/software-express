@@ -1,6 +1,13 @@
-import { insertarPuntuacion } from '../models/puntuaciones.model.js';
+import {
+  insertarPuntuacion,
+  seleccionarPuntuaciones,
+} from '../models/puntuaciones.model.js';
 
 const MAX_INT = 2147483647;
+
+export async function obtenerPuntuaciones() {
+  return seleccionarPuntuaciones();
+}
 
 export async function crearPuntuacion(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {

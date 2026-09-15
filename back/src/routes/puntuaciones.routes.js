@@ -1,7 +1,11 @@
 import { Router } from 'express';
-import { registrarPuntuacion } from '../controllers/puntuaciones.controller.js';
+import {
+  consultarPuntuaciones,
+  registrarPuntuacion,
+} from '../controllers/puntuaciones.controller.js';
 
 const router = Router();
+router.get('/', consultarPuntuaciones);
 router.post('/', registrarPuntuacion);
 
 export default router;

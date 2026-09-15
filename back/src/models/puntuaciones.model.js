@@ -1,5 +1,13 @@
 import { pool } from '../config/database.js';
 
+export async function seleccionarPuntuaciones() {
+  const [rows] = await pool.execute(
+    'SELECT id, jugador_id, videojuego_id, puntuacion, fecha FROM puntuaciones ORDER BY id ASC',
+  );
+
+  return rows;
+}
+
 export async function insertarPuntuacion({
   jugador_id,
   videojuego_id,
