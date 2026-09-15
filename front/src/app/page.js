@@ -1,69 +1,145 @@
-import Image from "next/image";
+"use client";
+
+import RegisterPlayerForm from "@/components/features/register-player-form";
+import { useEffect, useMemo, useState } from "react";
+
+const initialPlayer = { nombre: "", gamertag: "", correo: "" };
+const initialGame = { nombre: "", genero: "" };
+const initialScore = { jugador_id: "", videojuego_id: "", puntuacion: "" };
+
+async function request(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "No se pudo completar la petición.");
+  }
+
+  return data;
+}
 
 export default function Home() {
+  const [players, setPlayers] = useState([]);
+  const [games, setGames] = useState([]);
+  const [player, setPlayer] = useState(initialPlayer);
+  const [game, setGame] = useState(initialGame);
+  const [score, setScore] = useState(initialScore);
+  const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const playerCount = players.length;
+  const gameCount = games.length;
+
+  const selectedPlayer = useMemo(
+    () => players.find((item) => String(item.id) === String(score.jugador_id)),
+    [players, score.jugador_id]
+  );
+
+  useEffect(() => {
+    loadPlayers();
+  }, []);
+
+  async function loadPlayers() {
+    try {
+      const data = await request("/api/jugadores");
+      setPlayers(data.jugadores || []);
+    } catch (error) {
+      showMessage("error", error.message);
+    }
+  }
+
+  function showMessage(type, text) {
+    setMessage({ type, text });
+    window.setTimeout(() => setMessage(null), 4500);
+  }
+
+  async function handlePlayerSubmit(event) {
+    event.preventDefault();
+    setLoading(true);
+
+    try {
+      const data = await request("/api/jugadores", {
+        method: "POST",
+        body: JSON.stringify(player),
+      });
+      setPlayer(initialPlayer);
+      setPlayers((current) => [...current, data.jugador]);
+      showMessage("success", data.message);
+    } catch (error) {
+      showMessage("error", error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGameSubmit(event) {
+    event.preventDefault();
+    setLoading(true);
+
+    try {
+      const data = await request("/api/videojuegos", {
+        method: "POST",
+        body: JSON.stringify(game),
+      });
+      setGame(initialGame);
+      setGames((current) => [...current, data.videojuego]);
+      showMessage("success", `${data.message}. ID: ${data.videojuego.id}`);
+    } catch (error) {
+      showMessage("error", error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleScoreSubmit(event) {
+    event.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = {
+        jugador_id: Number(score.jugador_id),
+        videojuego_id: Number(score.videojuego_id),
+        puntuacion: Number(score.puntuacion),
+      };
+
+      const data = await request("/api/puntuaciones", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      setScore(initialScore);
+      showMessage("success", `${data.message}. Puntuación: ${data.puntuacion.puntuacion}`);
+    } catch (error) {
+      showMessage("error", error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen">
+      <header className="border-b border-neutral-200">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Software Express</p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight">GameDevOps</h1>
+          </div>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mb-8 max-w-2xl">
+          <h2 className="text-2xl font-semibold tracking-tight">Gestión del torneo</h2>
+          <p className="mt-2 text-neutral-500">
+            Administra jugadores, videojuegos y registra puntuaciones directamente mediante el backend conectado a MySQL.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        <RegisterPlayerForm />
+      </section>
+    </main>
   );
 }
