@@ -54,20 +54,34 @@ export default function Home() {
     [players, score.jugador_id]
   );
 
-  const filteredPlayers = useMemo(() => {
+const filteredPlayers = useMemo(() => {
     const search = searchPlayer.trim().toLowerCase();
-    if (!search) return players;
+    
+    // 1. Filtrar lista por nombre o gamertag
+    const list = !search
+      ? players
+      : players.filter((item) => {
+          const nombre = String(item.nombre || "").toLowerCase();
+          const gamertag = String(item.gamertag || "").toLowerCase();
+          return nombre.includes(search) || gamertag.includes(search);
+        });
 
-    return players.filter((item) => {
-      const nombre = String(item.nombre || "").toLowerCase();
-      const gamertag = String(item.gamertag || "").toLowerCase();
-      return nombre.includes(search) || gamertag.includes(search);
+    // 2. Acumular puntos por ID de jugador desde 'scores'
+    const totals = {};
+    scores.forEach((item) => {
+      const id = String(item.jugador_id ?? item.jugadorId);
+      const val = Number(item.puntuacion ?? item.puntos ?? 0);
+      totals[id] = (totals[id] || 0) + val;
     });
-  }, [players, searchPlayer]);
 
-  /*
-   * Cálculo de Puntos Corregido: Normalización estricta de IDs a String
-   */
+    // 3. Ordenar de mayor a menor puntuación
+    return [...list].sort((a, b) => {
+      const pointsA = totals[String(a.id)] || 0;
+      const pointsB = totals[String(b.id)] || 0;
+      return pointsB - pointsA;
+    });
+  }, [players, searchPlayer, scores]);
+
   const playerPoints = useMemo(() => {
     const totals = {};
 
@@ -387,7 +401,7 @@ export default function Home() {
 
           {/* LISTA DE JUGADORES */}
           <Card
-            title="Jugadores registrados"
+            title="Jugadores registrados y ranking"
             description="Consulta y visualiza los puntos acumulados de cada jugador."
             action={
               <button
