@@ -3,8 +3,10 @@ import jugadoresRoutes from './routes/jugadores.routes.js';
 import videojuegosRoutes from './routes/videojuegos.routes.js';
 import puntuacionesRoutes from './routes/puntuaciones.routes.js';
 import errorHandler from './middlewares/error.middleware.js';
+import cors from "cors";
 
 const app = express();
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 app.use('/api/jugadores', jugadoresRoutes);
 app.use('/api/videojuegos', videojuegosRoutes);
