@@ -1,4 +1,5 @@
 import { Geist } from "next/font/google";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 const geist = Geist({
@@ -14,7 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={geist.variable}>
-      <body>{children}</body>
+      <body><Toaster>{children}</Toaster></body>
     </html>
   );
 }

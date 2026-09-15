@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,7 +45,6 @@ export default function Home() {
   const [score, setScore] = useState(initialScore);
 
   const [searchPlayer, setSearchPlayer] = useState("");
-  const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [scoresLoading, setScoresLoading] = useState(false);
 
@@ -155,8 +154,7 @@ const filteredPlayers = useMemo(() => {
   }
 
   function showMessage(type, text) {
-    setMessage({ type, text });
-    window.setTimeout(() => setMessage(null), 4500);
+    toast.add({ type, title: text, timeout: 4500 });
   }
 
   // Handlers Jugador
@@ -299,12 +297,6 @@ const filteredPlayers = useMemo(() => {
             Administra jugadores, videojuegos y resultados del torneo.
           </p>
         </div>
-
-        {message && (
-          <Alert variant={message.type === "error" ? "destructive" : "default"} className="mb-6" role={message.type === "error" ? "alert" : "status"}>
-            <AlertDescription>{message.text}</AlertDescription>
-          </Alert>
-        )}
 
         <div className="mb-8 grid gap-4 sm:grid-cols-3">
           <Stat label="Jugadores registrados" value={players.length} />
@@ -465,9 +457,6 @@ const filteredPlayers = useMemo(() => {
                             <p className="text-xs text-muted-foreground">Puntos</p>
                             <p className="text-lg font-semibold">{points.toLocaleString()}</p>
                           </div>
-                          <Badge variant="secondary" className="font-mono">
-                            #{item.id}
-                          </Badge>
                         </div>
                       </div>
                     );
