@@ -7,12 +7,15 @@ import { Label } from "../../ui/label";
 import { useForm } from "react-hook-form";
 import { Spinner } from "../../ui/spinner";
 import ErrorMessage from "../../ui/error-message";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/toast";
 
 export default function RegisterPlayerForm() {
   const initialPlayer = { nombre: "", gamertag: "", correo: "" };
   const [player, setPlayer] = useState(initialPlayer);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -46,14 +49,14 @@ export default function RegisterPlayerForm() {
           data.message || data.error || "No se pudo registrar el jugador",
         );
       }
-      setMessage({
-        status: "success",
-        message: res.message,
+      queryClient.invalidateQueries({ queryKey: ["jugadores"] });
+      toast.add({
+        title: "Jugador Creado"
       });
     } catch (error) {
       setMessage({
         status: "error",
-        message: "Error al registrar un jugador",
+        message: error.message,
       });
       console.error(error);
     } finally {
