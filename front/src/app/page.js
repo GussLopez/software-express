@@ -1,6 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 
 const initialPlayer = { nombre: "", gamertag: "", correo: "" };
 const initialGame = { nombre: "", genero: "" };
@@ -266,20 +275,18 @@ const filteredPlayers = useMemo(() => {
   }
 
   return (
-    <main className="min-h-screen">
-      <header className="border-b border-neutral-200 bg-white">
+    <main className="min-h-screen bg-muted/30">
+      <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Software Express
             </p>
             <h1 className="mt-1 text-xl font-semibold tracking-tight">
               GameDevOps
             </h1>
           </div>
-          <span className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600">
-            API · localhost:4000
-          </span>
+          <Badge variant="outline">Panel del torneo</Badge>
         </div>
       </header>
 
@@ -288,91 +295,86 @@ const filteredPlayers = useMemo(() => {
           <h2 className="text-3xl font-semibold tracking-tight">
             Gestión del torneo
           </h2>
-          <p className="mt-2 text-neutral-500">
-            Administra jugadores, videojuegos y registra puntuaciones mediante MySQL.
+          <p className="mt-2 text-muted-foreground">
+            Administra jugadores, videojuegos y resultados del torneo.
           </p>
         </div>
 
         {message && (
-          <div
-            className={`mb-6 rounded-xl border px-4 py-3 text-sm ${
-              message.type === "success"
-                ? "border-neutral-200 bg-white text-neutral-800"
-                : "border-red-200 bg-red-50 text-red-700"
-            }`}
-          >
-            {message.text}
-          </div>
+          <Alert variant={message.type === "error" ? "destructive" : "default"} className="mb-6" role={message.type === "error" ? "alert" : "status"}>
+            <AlertDescription>{message.text}</AlertDescription>
+          </Alert>
         )}
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-4">
+        <div className="mb-8 grid gap-4 sm:grid-cols-3">
           <Stat label="Jugadores registrados" value={players.length} />
           <Stat label="Videojuegos registrados" value={games.length} />
           <Stat label="Puntos registrados" value={totalPoints.toLocaleString()} />
-          <Stat label="Estado del backend" value="Conectado" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* REGISTRAR JUGADOR */}
-          <Card title="Registrar jugador" description="Crea un jugador en la tabla jugadores.">
+          <Panel title="Registrar jugador" description="Agrega un participante al torneo.">
             <form onSubmit={handlePlayerSubmit} className="space-y-4">
               <Field label="Nombre" value={player.nombre} maxLength={100} onChange={handlePlayerNameChange} required />
               <Field label="Gamertag" value={player.gamertag} maxLength={50} onChange={handleGamertagChange} required />
               <Field label="Correo electrónico" type="email" value={player.correo} maxLength={150} onChange={handleEmailChange} required />
               <SubmitButton loading={loading}>Registrar jugador</SubmitButton>
             </form>
-          </Card>
+          </Panel>
 
           {/* REGISTRAR VIDEOJUEGO */}
-          <Card title="Registrar videojuego" description="Crea un videojuego en la tabla videojuegos.">
+          <Panel title="Registrar videojuego" description="Agrega un juego al catálogo del torneo.">
             <form onSubmit={handleGameSubmit} className="space-y-4">
               <Field label="Nombre" value={game.nombre} maxLength={100} onChange={handleGameNameChange} required />
               <Field label="Género" value={game.genero} maxLength={50} onChange={handleGenreChange} required />
               <SubmitButton loading={loading}>Registrar videojuego</SubmitButton>
             </form>
-          </Card>
+          </Panel>
 
           {/* REGISTRAR PUNTUACIÓN */}
-          <Card title="Registrar puntuación" description="Relaciona un jugador y un videojuego mediante sus IDs.">
+          <Panel title="Registrar puntuación" description="Selecciona un jugador y un videojuego para guardar su resultado.">
             <form onSubmit={handleScoreSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Jugador</label>
-                <select
+                <Label htmlFor="score-player" className="mb-2">Jugador</Label>
+                <NativeSelect
+                  id="score-player"
                   value={score.jugador_id}
                   onChange={(e) => handlePlayerIdChange(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-700"
+                  className="w-full"
                 >
-                  <option value="">Selecciona un jugador</option>
+                  <NativeSelectOption value="">Selecciona un jugador</NativeSelectOption>
                   {players.map((item) => (
-                    <option key={item.id} value={item.id}>
+                    <NativeSelectOption key={item.id} value={item.id}>
                       {item.gamertag} · ID {item.id}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
                 {selectedPlayer && (
-                  <p className="mt-1.5 text-xs text-neutral-500">
+                  <p className="mt-1.5 text-xs text-muted-foreground">
                     {selectedPlayer.nombre} · {selectedPlayer.correo}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Videojuego</label>
+                {games.length > 0 && <Label htmlFor="score-game" className="mb-2">Videojuego</Label>}
                 {games.length > 0 ? (
-                  <select
+                  <NativeSelect
+                    id="score-game"
                     value={score.videojuego_id}
                     onChange={(e) => handleGameIdChange(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-700"
+                    className="w-full"
                   >
-                    <option value="">Selecciona un videojuego</option>
+                    <NativeSelectOption value="">Selecciona un videojuego</NativeSelectOption>
                     {games.map((item) => (
-                      <option key={item.id} value={item.id}>
+                      <NativeSelectOption key={item.id} value={item.id}>
                         {item.nombre} · ID {item.id}
-                      </option>
+                      </NativeSelectOption>
                     ))}
-                  </select>
+                  </NativeSelect>
                 ) : (
                   <Field
                     label="ID del videojuego"
@@ -397,75 +399,75 @@ const filteredPlayers = useMemo(() => {
 
               <SubmitButton loading={loading}>Guardar puntuación</SubmitButton>
             </form>
-          </Card>
+          </Panel>
 
           {/* LISTA DE JUGADORES */}
-          <Card
+          <Panel
             title="Jugadores registrados y ranking"
             description="Consulta y visualiza los puntos acumulados de cada jugador."
             action={
-              <button
+              <Button
                 onClick={() => {
                   loadPlayers();
                   loadScores();
                 }}
-                className="text-xs font-semibold text-neutral-700 hover:underline"
+                variant="outline" size="sm" disabled={scoresLoading}
               >
                 Actualizar
-              </button>
+              </Button>
             }
           >
             <div className="mb-5">
-              <label className="mb-1.5 block text-sm font-medium">Buscar jugador</label>
+              <Label htmlFor="search-player" className="mb-2">Buscar jugador</Label>
               <div className="relative">
-                <input
+                <Input id="search-player"
                   type="text"
                   value={searchPlayer}
                   onChange={(e) => setSearchPlayer(e.target.value.replace(/[^a-zA-Z0-9À-ÿÑñ\s_]/g, ""))}
                   placeholder="Buscar por nombre o Gamertag..."
                   maxLength={100}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 pr-20 text-sm outline-none focus:border-neutral-700 focus:ring-2 focus:ring-neutral-100"
+                  className="pr-20"
                 />
                 {searchPlayer && (
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setSearchPlayer("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 hover:text-neutral-900"
+                    variant="ghost" size="xs" className="absolute right-1 top-1/2 -translate-y-1/2"
                   >
                     Limpiar
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-neutral-200">
+            <div className="overflow-hidden rounded-lg border border-border">
               {filteredPlayers.length === 0 ? (
                 <div className="px-4 py-8 text-center">
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-muted-foreground">
                     {players.length === 0 ? "No hay jugadores registrados." : "No se encontró ningún jugador."}
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-neutral-200">
+                <div className="divide-y divide-border">
                   {filteredPlayers.map((item) => {
                     const points = playerPoints[String(item.id)] || 0;
                     return (
                       <div key={item.id} className="flex items-center justify-between gap-4 px-4 py-4">
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">{item.nombre}</p>
-                          <p className="truncate text-xs text-neutral-500">
+                          <p className="truncate text-xs text-muted-foreground">
                             @{item.gamertag} · {item.correo}
                           </p>
                         </div>
 
                         <div className="flex shrink-0 items-center gap-3">
                           <div className="text-right">
-                            <p className="text-xs text-neutral-500">Puntos</p>
+                            <p className="text-xs text-muted-foreground">Puntos</p>
                             <p className="text-lg font-semibold">{points.toLocaleString()}</p>
                           </div>
-                          <span className="rounded-md bg-neutral-100 px-2 py-1 text-xs font-mono text-neutral-600">
+                          <Badge variant="secondary" className="font-mono">
                             #{item.id}
-                          </span>
+                          </Badge>
                         </div>
                       </div>
                     );
@@ -475,39 +477,38 @@ const filteredPlayers = useMemo(() => {
             </div>
 
             {scoresLoading && (
-              <p className="mt-3 text-xs text-neutral-400">Actualizando puntuaciones...</p>
+              <p className="mt-3 text-xs text-muted-foreground">Actualizando puntuaciones...</p>
             )}
-          </Card>
+          </Panel>
         </div>
       </section>
     </main>
   );
 }
 
-function Card({ title, description, action, children }) {
+function Panel({ title, description, action, children }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
-          <h3 className="font-semibold">{title}</h3>
-          <p className="mt-1 text-xs leading-5 text-neutral-500">{description}</p>
-        </div>
-        {action}
-      </div>
-      {children}
-    </section>
+    <Card className="min-w-0">
+      <CardHeader>
+        <CardTitle><h3>{title}</h3></CardTitle>
+        <CardDescription>{description}</CardDescription>
+        {action && <CardAction>{action}</CardAction>}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
 
 function Field({ label, value, onChange, type = "text", ...props }) {
+  const id = useId();
   return (
-    <div>
-      <label className="mb-1.5 block text-sm font-medium">{label}</label>
-      <input
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-700 focus:ring-2 focus:ring-neutral-100"
         {...props}
       />
     </div>
@@ -516,21 +517,19 @@ function Field({ label, value, onChange, type = "text", ...props }) {
 
 function SubmitButton({ children, loading }) {
   return (
-    <button
-      type="submit"
-      disabled={loading}
-      className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
-    >
+    <Button type="submit" size="lg" disabled={loading} className="w-full" aria-busy={loading}>
       {loading ? "Procesando..." : children}
-    </button>
+    </Button>
   );
 }
 
 function Stat({ label, value }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white px-5 py-4 shadow-sm">
-      <p className="text-xs text-neutral-500">{label}</p>
-      <p className="mt-1 text-xl font-semibold">{value}</p>
-    </div>
+    <Card size="sm">
+      <CardHeader>
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className="text-2xl tabular-nums">{value}</CardTitle>
+      </CardHeader>
+    </Card>
   );
 }
