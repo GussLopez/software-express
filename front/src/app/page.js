@@ -1,6 +1,6 @@
 "use client"
 
-import RegisterPlayerForm from "@/components/features/register-player-form";
+import RegisterPlayerForm from "@/components/features/jugadores/register-player-form";
 
 export default function Home() {
 

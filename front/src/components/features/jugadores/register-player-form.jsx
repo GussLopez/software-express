@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 import { useForm } from "react-hook-form";
-import { Spinner } from "../ui/spinner";
-import ErrorMessage from "../ui/error-message";
+import { Spinner } from "../../ui/spinner";
+import ErrorMessage from "../../ui/error-message";
 
 export default function RegisterPlayerForm() {
   const initialPlayer = { nombre: "", gamertag: "", correo: "" };
